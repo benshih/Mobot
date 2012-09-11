@@ -1,0 +1,2 @@
+Error[1211] C:\Users\Benjamin Shih\MPLABXProjects\speedControl.X\led_test.c 32 : missing definition for interrupt function 'low_isr'
+Error[1211] C:\Users\Benjamin Shih\MPLABXProjects\speedControl.X\led_test.c 32 : missing definition for interrupt function 'high_isr'

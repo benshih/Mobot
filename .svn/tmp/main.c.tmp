@@ -1,0 +1,303 @@
+#include <p18f27j53.h>
+#include <timers.h>
+#include <adc.h>
+#include <delays.h>
+#include "main.h"
+
+
+
+char servoFlag;
+unsigned short servoDur, time; // Max of a char is 255 (8 bits).
+
+//******************************
+//              MAIN
+//******************************
+void main(void)
+{
+    /*
+
+    // Test if LED blinks properly on LATA.
+    init();
+
+    // Makes an LED plugged into RA0 pwm at 50kHz (once every 20msec).
+    while(1)
+    {
+        LATAbits.LATA0 = 1;
+        Delay10KTCYx(2);
+        LATAbits.LATA0 = 0;
+        Delay10KTCYx(2);
+    }
+
+    */
+
+
+    init();
+    initTimers();
+
+    
+// START H-BRIDGE AND CHECKING COMPARATOR
+// Enable the H-bridge with pwm at 50kHz.
+
+    LATAbits.LATA1 = 0; // Set RA1 (PMOS) off.
+    LATAbits.LATA2 = 1; // Set RA2 (NMOS) off.
+	
+    servoFlag = 0;
+    //servoDur = 0;
+    //time = 0;
+
+    while(1)
+    {
+
+        // H-Bridge pwm. Convention: total time is always 20msec.
+    	// Off.
+        //LATAbits.LATA0 = 0; // Set RA0 (PMOS) off.
+	//LATAbits.LATA3 = 1; // Set RA3 (NMOS) off.
+        //Delay1KTCYx(18);
+
+
+
+        LATBbits.LATB0 = 1;
+        Delay1KTCYx(1);
+        // Read I/O pin and modify LED as necessary.
+        Delay1KTCYx(1);
+        LATBbits.LATB0 = 0;
+        Delay1KTCYx(2);
+        LATBbits.LATB0 = 1;
+
+        LATBbits.LATB0 = 1;
+        Delay1KTCYx(1);
+        // Read I/O pin and modify LED as necessary.
+        Delay1KTCYx(1);
+        LATBbits.LATB0 = 0;
+        Delay1KTCYx(2);
+        LATBbits.LATB0 = 1;
+
+        LATBbits.LATB0 = 1;
+        Delay1KTCYx(1);
+        // Read I/O pin and modify LED as necessary.
+        Delay1KTCYx(1);
+        LATBbits.LATB0 = 0;
+        Delay1KTCYx(2);
+        LATBbits.LATB0 = 1;
+
+        LATBbits.LATB0 = 1;
+        Delay1KTCYx(1);
+        // Read I/O pin and modify LED as necessary.
+        Delay1KTCYx(1);
+        LATBbits.LATB0 = 0;
+        Delay1KTCYx(2);
+        LATBbits.LATB0 = 1;
+
+ 
+
+        // On.
+        //LATAbits.LATA0 = 1; // Set RA0 (PMOS) on.
+	//LATAbits.LATA3 = 0; // Set RA3 (NMOS) on.
+
+        LATBbits.LATB0 = 1;
+        Delay1KTCYx(1);
+        // Read I/O pin and modify LED as necessary.
+        Delay1KTCYx(1);
+        LATBbits.LATB0 = 0;
+        Delay1KTCYx(2);
+        LATBbits.LATB0 = 1;
+
+        if(1 == PORTBbits.RB1)
+        {
+            LATCbits.LATC1 = 1;
+        }
+        else
+        {
+            LATCbits.LATC1 = 0;
+        }
+
+
+        //test_pulse();
+//        Delay1KTCYx(2);
+
+        // IR LED (for encoder) pwm.
+        //LATAbits.
+
+
+/*
+        // Output pin (6) of comparator is connected to the RA5 pin (7) on the pic18.
+        int encoder = PORTAbits.RA5;
+        // 3 volt threshold picked based on testing the sensor manually.
+        if(1 == encoder)
+        {
+            // Comparator returns true (high), so set the LED on. 
+            PORTAbits.RA7 = 1;
+        }
+        else
+        {
+            // Comparator returns false (low), so set the LED off.
+            PORTAbits.RA7 = 0;
+        }
+*/
+    }
+
+// END H-BRIDGE  AND CHECKING COMPARATOR
+
+
+    /*
+// Makes an LED plugged into RA0 pwm at 50kHz (once every 20msec).
+
+	while(1)
+	{
+		PORTAbits.RA0 = 1;
+		Delay10KTCYx(2);
+		PORTAbits.RA0 = 0;
+		Delay10KTCYx(2);
+	}
+*/
+
+
+// Old code from PickIt2.
+	/*OpenADC(ADC_FOSC_32 & ADC_RIGHT_JUST,ADC_CH0 & ADC_INT_OFF & ADC_VREFPLUS_VDD & ADC_VREFMINUS_VSS, 0); 	
+
+	while(1)
+	{
+		ConvertADC();
+		while(BusyADC());
+		if(0 <= ReadADC()) //can only open one channel at a time
+			PORTAbits.RA1 = 1;
+		else
+			PORTAbits.RA1 = 0;
+	}*/
+}
+
+// Total of 4K.
+void test_pulse()
+{
+    LATBbits.LATB0 = 1;
+    Delay1KTCYx(1);
+    // Read I/O pin and modify LED as necessary.
+    Delay1KTCYx(1);
+    LATBbits.LATB0 = 0;
+    Delay1KTCYx(2);
+}
+
+void init(void)
+{
+    TRISA = 0x00; // 0x01 means PORTA bit 0 is an input.
+    PORTA = 0x00; // Initialization: all pins start as off. 0xFF for all pins on at start.
+    TRISB = 0x02; // PORTB bit 1 is an input.
+    PORTB = 0x00;
+    TRISC = 0x00; // 0x01 means PORTC bit 0 is an input.
+    PORTC = 0x00; // Initialization: all pins start as off. 0xFF for all pins on at start. 
+
+    OSCCON = OSCCON | 0x60; // Set the reported oscillator control to 4 MHz (actual: 1 MHz).
+	/* TRIS tells you whether or not it's input or output (1 or 0), while PORT tells 
+	what you're outputting if you are outputting something
+	*/
+}
+
+void initTimers()
+{
+    //turn timers off
+    T0CONbits.TMR0ON = 0;
+    T1CONbits.TMR1ON = 0;
+
+    // Initializing Timer 0 settings.
+    // Turned off in the below code, so we can ignore this section for now.
+    OpenTimer0(	TIMER_INT_ON 	& 
+        	T0_16BIT	&
+                T0_SOURCE_INT 	&
+		T0_EDGE_RISE	&
+		T0_PS_1_16);
+    T0CONbits.PSA = 0; //prescale off
+    
+
+    //Initializing Timer 1 settings.
+    
+    /*
+    OpenTimer1( TIMER_INT_ON	& // Left on in the below code.
+    		T1_16BIT_RW	&
+                T1_OSC1EN_OFF   & // Disable external oscillator.
+        	T1_SOURCE_FOSC_4 & // Select clock source.
+    		T1_PS_1_1	&
+    		T1_SYNC_EXT_OFF, 0);
+    */
+    // Changing the bits using a single word should be slightly faster than using the OpenTimer function.
+    T1CON = 0x06;
+
+    //Initializing Interrupts
+    RCONbits.IPEN = 1;      //Initialize the IP
+
+    INTCONbits.TMR0IE = 0;  //Disable TMR0 interrupt
+    INTCON2bits.TMR0IP = 1; //Set Timer0 to HighP
+
+    PIE1bits.TMR1IE = 1;    //Enable TMR1 interrupt
+    IPR1bits.TMR1IP = 0;    //Set Timer1 to LowP
+
+    //PIE1bits.SSPIE = 1;     //enable MSSP interrupts
+    //IPR1bits.SSPIP = 1;     //MSSP are high priority
+
+    INTCONbits.PEIE = 1;    //Turn on LP interrupts
+    INTCONbits.GIE = 1;     //Turn on HP interrupts
+
+    WriteTimer0(0xFFFF - 0x4E20);//dur);
+    WriteTimer1(0xFFFF - 0x4E20);//invert(dur));
+
+    // Start the timers (if 1).
+    T0CONbits.TMR0ON = 0;
+    T1CONbits.TMR1ON = 1;
+
+    //I2C config commented below
+    /*
+    //enabling serial ports
+    SSPCON1bits.SSPEN = 1;
+    //setting mastermode
+    SSPCON1bits.SSPM3 = 1;
+    SSPCON1bits.SSPM2 = 0;
+    SSPCON1bits.SSPM1 = 0;
+    SSPCON1bits.SSPM0 = 0;
+    //since Fosc = 4MHz, SCK = 100Khz
+    SSPADD = 0x9;*/
+}
+
+void high_isr(void)
+{
+    INTCONbits.TMR0IF = 0;
+    PIR1bits.SSP1IF = 0;
+	//WriteTimer0(0xDB);
+   //	if(ran2 == 0) ran2 = 1;
+   // else ran2 = 0;
+}
+
+void low_isr(void)
+{
+    PIR1bits.TMR1IF = 0;
+    servoDur = 0x5DC;
+    //WriteTimer1(0xFFFF - 0x4E20);//invert(dur));
+    if(0 == servoFlag)
+    {
+        LATCbits.LATC2 = 1;
+        // Total period of 20m sec. Each instruction cycle is 1u sec, so there are 20,000u secs.
+        time = 0xFFFF - servoDur;
+        //time = 0xFFFF - 0x5DC;
+        WriteTimer1(time);
+        servoFlag = 1;
+
+        LATAbits.LATA0 = 0; // Set RA0 (PMOS) off.
+	LATAbits.LATA3 = 1; // Set RA3 (NMOS) off.
+
+    }
+    else
+    {
+        LATCbits.LATC2 = 0;
+        //time = (0x4E20 - servoDur);
+        time = 0xFFFF - (0x4E20 - servoDur);
+        WriteTimer1(time);//invert(dur));
+        servoFlag = 0;
+
+        LATAbits.LATA0 = 1; // Set RA0 (PMOS) on.
+	LATAbits.LATA3 = 0; // Set RA3 (NMOS) on.
+    }
+    //servoFlag = !servoFlag;
+
+    
+
+    // Do whatever.
+    // For now, turn an LED on/off.
+}
